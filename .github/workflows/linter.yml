@@ -1,0 +1,66 @@
+name: Flake 8 and Test
+
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+  
+jobs:
+  flake8-lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v2
+      - name: Set up Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: flake8 Lint
+        uses: py-actions/flake8@v2
+        with:
+          # Module level import not at top of file (E402)
+          # Block comment should start with '# ' (E265)
+          # Local variable name is assigned to but never used (F841)
+          # f-string without any placeholders (F541)
+          # Multiple statements on one line (semicolon) (E702)
+          # Module imported but unused (F401)
+          # Line too long (82 &gt; 79 characters) (E501)
+          # Line break occurred before a binary operator (W503)
+          ignore: "E203,E402,E265,F841,F541,E702,F401,E501,W503"
+          max-line-length: 120
+
+  build_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: The current branch
+        run: |
+          echo "using GITHUB_ref_name : $GITHUB_REF_NAME"
+          echo "using GITHUB_BASE_REF : $GITHUB_BASE_REF"
+          echo "using GITHUB_HEAD_REF : $GITHUB_HEAD_REF"
+
+      - uses: actions/checkout@v2
+      - name: Build Docker for sail Test
+        env:
+          PAT: ${{ secrets.JENKINS_BUILD_TOKEN }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -e
+          pwd
+          ls -l 
+          sudo chmod 666 /var/run/docker.sock
+          docker build --build-arg git_personal_token=$PAT --build-arg branch=$BRANCH_NAME -t sail/sail-data-layer-test -f docker/dockerfile_test .
+          docker run sail/sail-data-layer-test
+  
+  workflow-conclusion:
+    # Without this step workflow remains "green" if build does fail.
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [flake8-lint, build_test]
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v2
+      - name: Check Job Status status and fail if they are red
+        if: env.WORKFLOW_CONCLUSION == 'failure'
+        run: exit 1
