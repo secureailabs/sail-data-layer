@@ -119,7 +119,7 @@ class ToolsDataTest:
 
         raise NotImplementedError()
 
-        return SeriesFederated(list_reference, data_model_series)
+        # return SeriesFederated(list_reference, data_model_series)
 
     @staticmethod
     def from_dict_array(series_name: str, dict_array: Dict[str, np.ndarray]) -> Series:
