@@ -38,7 +38,7 @@ class TabularDataset(BaseDataset):
     # property section start
     @property
     def list_data_frame_name(self) -> List[str]:
-        return list(self.__data_model.list_data_frame_name)
+        return list(self.__dict_data_frame.keys())
 
     @property
     def data_model(self) -> TabularDatasetDataModel:

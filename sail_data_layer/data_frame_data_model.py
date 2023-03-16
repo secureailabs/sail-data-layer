@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from sail_data_layer.series_data_model import SeriesDataModel
 
@@ -27,6 +27,29 @@ class DataFrameDataModel:
         return list(self.dict_data_model_series.keys())
 
     # property section end
+    # TODO type dataframe without avoiding cyclic dependance USE interface!
+    def validate(self, data_frame, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
+        # TODO validate that patient id and dataset id series are present?
+
+        # validate all data sereis present
+        list_series_name_model = self.list_series_name
+        list_series_name_data_frame = data_frame.list_series_name
+        for name in list_series_name_model:
+            if name not in list_series_name_data_frame:
+                list_problem.append(
+                    f"In data frame with name {self.data_frame_name} series with name {name} specified in model but not present in data frame"
+                )
+        for name in list_series_name_data_frame:
+            if name not in list_series_name_model:
+                list_problem.append(
+                    f"In data frame with name {self.data_frame_name} series with name {name} present in data frame but not specified in model"
+                )
+
+        for name in list_series_name_data_frame:
+            if name in list_series_name_model:
+                self[name].validate(self.data_frame_name, data_frame[name], list_problem)
+
+        return len(list_problem) == 0, list_problem
 
     def get_data_model_series(self, series_name: str) -> SeriesDataModel:
         if series_name not in self.dict_data_model_series:

@@ -1,19 +1,23 @@
 import os
 
+import gdown
 import pytest
 
+from sail_data_layer.csvv1_dataset_serializer import Csvv1DatasetSerializer
 from sail_data_layer.data_federation_packager import DataFederationPackager
 from sail_data_layer.data_frame import DataFrame
 from sail_data_layer.fhirv1_dataset_serializer import Fhirv1DatasetSerializer
 from sail_data_layer.longitudinal_dataset import LongitudinalDataset
+from sail_data_layer.tabular_dataset import TabularDataset
 from sail_data_layer.test.tools_data_test import ToolsDataTest
 
 
 def prepare_test_data():
     list_name_data_federation_test = []
-    list_name_data_federation_test.append("r4sep2019_fhirv1_60_3")
-    list_name_data_federation_test.append("gdc_csvv1_941_4")
-    list_name_data_federation_test.append("c4kv_csvv1_210_3")
+    list_name_data_federation_test.append("r4sep2019_fhirv1_20_1")
+    # list_name_data_federation_test.append("gdc_csvv1_941_4")
+    # list_name_data_federation_test.append("c4kv_csvv1_210_3")
+    list_name_data_federation_test.append("c4kv_csvv1_210_1")
     # download data_federations if needed
 
     # prepare
@@ -24,13 +28,30 @@ def prepare_test_data():
         packager.prepare_data_federation(path_file_data_federation)
 
 
+def download_test_data():
+    # data federations are maintained in google drive,
+    # link are accesable at the sail user-group level
+    dict_datafederation_packaged = {}
+    dict_datafederation_packaged[
+        "r4sep2019_fhirv1_20_1"
+    ] = "https://drive.google.com/file/d/10Ur8U4dc3dliucmSiYZ9JCEuI9WCRxyR"
+    dict_datafederation_packaged[
+        "c4kv_csvv1_210_1"
+    ] = "https://drive.google.com/file/d/10TwCDXmwWfLQhEAuVP7rFIYb9z-HL65W"
+    path_dir_data_federation_packaged = ToolsDataTest.get_path_dir_data_federation_packaged()
+    os.makedirs(path_dir_data_federation_packaged, exist_ok=True)
+    for name_data_federation, url in dict_datafederation_packaged.items():
+        path_file_data_federation = os.path.join(path_dir_data_federation_packaged, name_data_federation + ".zip")
+        if not os.path.isfile(path_file_data_federation):
+            gdown.download(url, path_file_data_federation, quiet=False)
+
+
 def pytest_sessionstart(session):
     """
     Called after the Session object has been created and
     before performing collection and entering the run test loop.
     """
     prepare_test_data()
-
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -41,11 +62,20 @@ def pytest_sessionfinish(session, exitstatus):
 
 
 @pytest.fixture
+def tabular_dataset_c4kv_csvv1_210_1() -> TabularDataset:
+    serializer = Csvv1DatasetSerializer()
+    path_dir_dataset_prepared = ToolsDataTest.get_path_dir_dataset_prepared()
+    path_file_dataset = os.path.join(path_dir_dataset_prepared, "c75f663e-d9ee-4f1c-9458-79e92d1c126a")
+    return serializer.read_dataset_for_path(path_file_dataset)  # TODO make it read from datafederation header
+
+
+@pytest.fixture
 def longitudinal_dataset_r4sep2019_20_1() -> LongitudinalDataset:
+    # this fixture is a hack since the r4sep2019_fhirv1_60_3 datafederation has more than 1 dataset
     serializer = Fhirv1DatasetSerializer()
     path_dir_dataset_prepared = ToolsDataTest.get_path_dir_dataset_prepared()
     path_file_dataset = os.path.join(path_dir_dataset_prepared, "a892ef90-4f6f-11ed-bdc3-0242ac120002")
-    return serializer.read_dataset_for_path(path_file_dataset) #TODO make it read from datafederation header
+    return serializer.read_dataset_for_path(path_file_dataset)  # TODO make it read from datafederation header
 
 
 # @pytest.fixture

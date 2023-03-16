@@ -8,6 +8,7 @@ import pandas
 
 from sail_data_layer.base_dataset_serializer import BaseDatasetSerializer
 from sail_data_layer.data_frame import DataFrame
+from sail_data_layer.series_data_model import SeriesDataModel
 from sail_data_layer.tabular_dataset import TabularDataset
 from sail_data_layer.tabular_dataset_data_model import TabularDatasetDataModel
 
@@ -39,7 +40,9 @@ class Csvv1DatasetSerializer(BaseDatasetSerializer):
         dataset_name = header_dataset["dataset_name"]
         # TODO check header
         with ZipFile(path_file_data_model) as archive_data_model:
-            data_model_tabular = TabularDatasetDataModel.from_dict(json.loads(archive_data_model.read("data_model.json")))
+            data_model_tabular = TabularDatasetDataModel.from_dict(
+                json.loads(archive_data_model.read("data_model.json"))
+            )
         list_data_frame = []
         with ZipFile(path_file_data_content) as archive_data_content:
             for name_file in archive_data_content.namelist():
@@ -47,12 +50,22 @@ class Csvv1DatasetSerializer(BaseDatasetSerializer):
                     raise Exception()
                 data_frame_name = name_file.split(".csv")[0]
                 data_model_data_frame = data_model_tabular[data_frame_name]
+                dict_dtype = {}
+                for name_series in data_model_data_frame.list_series_name:
+                    if data_model_data_frame[name_series].type_data_level == SeriesDataModel.DataLevelUnique:
+                        dict_dtype[name_series] = str
+                    if data_model_data_frame[name_series].type_data_level == SeriesDataModel.DataLevelCategorical:
+                        dict_dtype[name_series] = str
+                    if data_model_data_frame[name_series].type_data_level == SeriesDataModel.DataLevelInterval:
+                        dict_dtype[name_series] = float
+
                 list_data_frame.append(
                     DataFrame.from_csv_str(
                         dataset_id,
                         data_frame_name,
                         data_model_data_frame,
                         archive_data_content.read(name_file),
+                        dict_dtype=dict_dtype,
                     )
                 )
         return TabularDataset(data_federation_id, data_federation_name, dataset_id, dataset_name, list_data_frame)
