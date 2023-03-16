@@ -27,40 +27,47 @@ class ToolsDataTest:
     #     data_frame_federated.dict_dataframe[dataset_id] = data_frame
     #     return data_frame_federated
 
-
     @staticmethod
     def get_path_dir_data_federation_unpackaged():
-        return os.path.join(ToolsDataTest.get_path_dir_environment("PATH_DIR_DATA_SAIL"), "formatted", "data_federation_unpackaged")
+        return os.path.join(
+            ToolsDataTest.get_path_dir_environment("PATH_DIR_DATA_SAIL"), "formatted", "data_federation_unpackaged"
+        )
 
     @staticmethod
     def get_path_dir_data_federation_packaged():
-        return os.path.join(ToolsDataTest.get_path_dir_environment("PATH_DIR_DATA_SAIL"), "formatted", "data_federation_packaged")
+        return os.path.join(
+            ToolsDataTest.get_path_dir_environment("PATH_DIR_DATA_SAIL"), "formatted", "data_federation_packaged"
+        )
 
     @staticmethod
     def get_path_dir_dataset_prepared():
-        return os.path.join(ToolsDataTest.get_path_dir_environment("PATH_DIR_DATA_SAIL"), "formatted", "dataset_prepared")
+        return os.path.join(
+            ToolsDataTest.get_path_dir_environment("PATH_DIR_DATA_SAIL"), "formatted", "dataset_prepared"
+        )
 
     @staticmethod
-    def get_path_dir_environment(environment_variable_name:str, check_exists:bool=True) -> str:
+    def get_path_dir_environment(environment_variable_name: str, check_exists: bool = True) -> str:
         environment_variable_value = os.environ.get(environment_variable_name)
         if environment_variable_value is None:
             raise RuntimeError(f"No value for environment variable {environment_variable_name}")
         if check_exists:
             if not os.path.isdir(environment_variable_value):
-                raise RuntimeError(f"Path {environment_variable_value} for environment variable {environment_variable_name} is not an existing directory")
+                raise RuntimeError(
+                    f"Path {environment_variable_value} for environment variable {environment_variable_name} is not an existing directory"
+                )
         return environment_variable_value
 
-
     @staticmethod
-    def load_path_file_environment(environment_variable_name:str, check_exists:bool=True) -> str:
+    def load_path_file_environment(environment_variable_name: str, check_exists: bool = True) -> str:
         environment_variable_value = os.environ.get(environment_variable_name)
         if environment_variable_value is None:
             raise RuntimeError(f"No value for environment variable {environment_variable_name}")
         if check_exists:
             if not os.path.isfile(environment_variable_value):
-                raise RuntimeError(f"Path {environment_variable_value} for environment variable {environment_variable_name} is not an existing directory")
+                raise RuntimeError(
+                    f"Path {environment_variable_value} for environment variable {environment_variable_name} is not an existing directory"
+                )
         return environment_variable_value
-
 
     @staticmethod
     def from_csv(dict_csv: Dict[str, str]) -> DataFrame:
@@ -112,7 +119,7 @@ class ToolsDataTest:
 
         raise NotImplementedError()
 
-        return SeriesFederated(list_reference, data_model_series)
+        # return SeriesFederated(list_reference, data_model_series)
 
     @staticmethod
     def from_dict_array(series_name: str, dict_array: Dict[str, np.ndarray]) -> Series:
@@ -134,5 +141,5 @@ class ToolsDataTest:
         dict_dataset_name_to_dataset_id = packager.get_dict_dataset_name_to_dataset_id(path_file_data_federation)
         data_model_longitudinal = {}
         serializer = Fhirv1DatasetSerializer()
-        
+
         raise NotImplementedError()

@@ -66,19 +66,24 @@ class DataFrame(DataFramePandas):
 
     @staticmethod
     def from_csv(
-        dataset_id: str, data_frame_name: str, data_frame_data_model: DataFrameDataModel, path_file_csv: str
+        dataset_id: str,
+        data_frame_name: str,
+        data_frame_data_model: DataFrameDataModel,
+        path_file_csv: str,
+        dict_dtype: dict,
     ) -> "DataFrame":
         with open(path_file_csv, "rb") as file:
-            return DataFrame.from_csv_str(dataset_id, data_frame_name, data_frame_data_model, file.read())
+            return DataFrame.from_csv_str(dataset_id, data_frame_name, data_frame_data_model, file.read(), dict_dtype)
 
     @staticmethod
     def from_csv_str(
         dataset_id: str,
         data_frame_name: str,
         data_frame_data_model: DataFrameDataModel,
-        csv_content: str,
+        csv_content: bytes,
+        dict_dtype: dict,
     ) -> "DataFrame":
-        data_frame_pandas = pandas.read_csv(BytesIO(csv_content))
+        data_frame_pandas = pandas.read_csv(BytesIO(csv_content), dtype=dict_dtype)
         return DataFrame.from_pandas(dataset_id, data_frame_name, data_frame_data_model, data_frame_pandas)
 
     @staticmethod

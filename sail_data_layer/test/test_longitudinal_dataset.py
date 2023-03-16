@@ -45,17 +45,15 @@ def test_convert_to_data_frame(longitudinal_dataset_r4sep2019_20_1: Longitudinal
     )
 
     # Act
-    #TODO
+    # TODO
     data_frame = longitudinal_dataset_r4sep2019_20_1.convert_to_data_frame(data_model_data_frame)
 
     name_series_1 = data_frame.list_series_name[1]
     name_series_2 = data_frame.list_series_name[2]
     data_model_series = data_frame[name_series_1].data_model_series
 
-
     # Assert
     assert isinstance(data_frame, DataFrame)
     assert isinstance(data_frame[name_series_1], Series)
     assert data_model_series.type_data_level == SeriesDataModel.DataLevelInterval
     assert data_model_series.unit == "kg/m2"
-

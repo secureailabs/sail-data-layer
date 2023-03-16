@@ -1,6 +1,6 @@
 import json
 import statistics
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 
 class SeriesDataModel:
@@ -32,8 +32,8 @@ class SeriesDataModel:
         type_data_level: str,
         *,
         unit: str = None,
-        value_min: str = None,
-        value_max: str = None,
+        value_min: float = None,
+        value_max: float = None,
         resolution: float = None,
         list_value: List[str] = None,
         measurement_source_name: str = None,
@@ -66,6 +66,73 @@ class SeriesDataModel:
 
         self.type_agregator = type_agregator
         self.measurement_source_name = measurement_source_name
+
+    # TODO type dataframe without avoiding cyclic dependance USE interface!
+    def validate(self, name_data_frame, series, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
+        problem_prefix = f"In data frame with name {name_data_frame} in series with name {self.series_name} "
+        if self.type_data_level == SeriesDataModel.DataLevelUnique:
+            # check that the series type is string
+            for index, value in series.items():  # TODO index should be patient_id
+                if value is not None:  # TODO currently every value is allowed to be None
+                    if not isinstance(value, str):
+                        list_problem.append(
+                            problem_prefix
+                            + f" at index {index} value is not of type string but of type {str(type(value))} while date model specifies this is series as Unique"
+                        )
+        if self.type_data_level == SeriesDataModel.DataLevelCategorical:
+            # check that the series.dtype is string
+            # check that every value is out of the list of values or None
+
+            for index, value in series.items():  # TODO index should be patient_id
+                if not isinstance(value, str):
+                    if value is not None:  # TODO currently every value is allowed to be None
+                        list_problem.append(
+                            problem_prefix
+                            + f" at index {index} value is not of type string but of type {str(type(value))} while date model specifies this is series as Categorical"
+                        )
+                if str(value) not in self.list_value:
+                    if value is not None:  # TODO currently every value is allowed to be None
+                        list_problem.append(
+                            problem_prefix
+                            + f" at index {index} value is {str(value)} which is not in the list of allowed values"
+                        )
+
+        if self.type_data_level == SeriesDataModel.DataLevelInterval:
+            # check that the series.dtype is float
+            # check that every value is between min an max if specified
+            # check that every value is in resolution if specified
+
+            for index, value in series.items():  # TODO index should be patient_id
+                if not isinstance(value, float):
+                    list_problem.append(
+                        problem_prefix
+                        + f"at index {index} value is not of type float but of type {str(type(value))} while date model specifies this is series as Interval"
+                    )
+                    continue
+                if self.value_min is not None:
+                    if value < self.value_min:
+                        list_problem.append(
+                            problem_prefix
+                            + f"at index {index} value is smaller than specified minimum of : {str(self.value_min)}"
+                        )
+
+                if self.value_max is not None:
+                    if self.value_max < value:
+                        list_problem.append(
+                            problem_prefix
+                            + f"at index {index} value is larger than specified minimum of : {str(self.value_min)}"
+                        )
+
+                if self.resolution is not None:
+                    if 0.0001 < (value % self.resolution):
+                        list_problem.append(
+                            problem_prefix
+                            + f"at index {index} value is out of specified resultion  {str(self.resolution)} by more than 0.0001"
+                        )
+
+        # validate all data sereis present
+
+        return len(list_problem) == 0, list_problem
 
     def agregate(self, patient):
         try:

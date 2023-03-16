@@ -39,11 +39,17 @@ class Series(SeriesPandas):
         data_model_series: SeriesDataModel,
         series_pandas: SeriesPandas,
     ) -> "Series":
-        if series_pandas.dtype == int:
-            # dtype is aways float no ints allowed at this point
-            series_pandas = series_pandas.astype(float)
+        if data_model_series.type_data_level == SeriesDataModel.DataLevelUnique:
+            # this code is a bit weird but at loading string series None are replaced by float nans, those nans (float type) cannot be directly filled with None for strange pandas reasons
+            series_pandas = series_pandas.fillna("")
+            series_pandas = series_pandas.replace(r"^\s*$", None, regex=True)
+        if data_model_series.type_data_level == SeriesDataModel.DataLevelCategorical:
+            series_pandas = series_pandas.fillna("")
+            series_pandas = series_pandas.replace(r"^\s*$", None, regex=True)
+            # series_pandas = series_pandas.replace("", None)
         series = Series(dataset_id, data_model_series, series_pandas.to_list())
         series.index = series_pandas.index
+
         return series
 
     # TODO check what feature we use on the Pandas series that return pandas series, those will need overloading
