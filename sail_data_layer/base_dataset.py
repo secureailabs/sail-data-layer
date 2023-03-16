@@ -11,8 +11,6 @@ class BaseDataset:
         self.__dataset_id = dataset_id
         self.__dataset_name = dataset_name
 
-
-
     # property section start
     @property
     def dataset_federation_id(self) -> str:
