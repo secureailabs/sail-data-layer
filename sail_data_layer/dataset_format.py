@@ -1,9 +1,12 @@
 from enum import Enum
 
 
-class DatasetFormat(Enum):
+class DatasetFormat(str, Enum):
     csvv1 = "csvv1"
     fhirv1 = "fhirv1"
+
+    def __str__(self) -> str:
+        return str(self.value)
 
     @staticmethod
     def parse_str(value: str):
