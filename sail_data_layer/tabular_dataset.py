@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from sail_data_layer.base_dataset import BaseDataset
 from sail_data_layer.data_frame import DataFrame
@@ -45,6 +45,8 @@ class TabularDataset(BaseDataset):
         return self.__data_model
 
     # property section end
+    def validate(self) -> Tuple[bool, List[str]]:
+        return self.data_model.validate(self)
 
     def get_data_frame(self, data_frame_name: str) -> DataFrame:
         if data_frame_name not in self.__dict_data_frame:

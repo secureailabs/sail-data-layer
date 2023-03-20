@@ -10,8 +10,7 @@ import dateutil.parser
 
 from sail_data_layer.base_dataset_serializer import BaseDatasetSerializer
 from sail_data_layer.longitudinal_dataset import LongitudinalDataset
-from sail_data_layer.longitudinal_dataset_data_model import \
-    LongitudinalDatasetDataModel
+from sail_data_layer.longitudinal_dataset_data_model import LongitudinalDatasetDataModel
 
 
 class Fhirv1DatasetSerializer(BaseDatasetSerializer):
@@ -21,8 +20,12 @@ class Fhirv1DatasetSerializer(BaseDatasetSerializer):
     # zipfile.ZIP_DEFLATED	Deflate	zlib
     # zipfile.ZIP_BZIP2	    Bzip2	bz2
     # zipfile.ZIP_LZMA	    LZMA	lzma
-    def __init__(self) -> None:
-        super().__init__("fhirv1")
+    def __init__(self, path_dir_dataset_store=None) -> None:
+        if path_dir_dataset_store is None:
+            path_dir_dataset_store = os.environ.get("PATH_DIR_DATASET")
+            if path_dir_dataset_store is None:
+                raise Exception("Evironment variable: `PATH_DIR_DATASET` not set and none given")
+        super().__init__("fhirv1", path_dir_dataset_store)
 
     def read_dataset(self, dataset_id: str) -> LongitudinalDataset:
         return self.read_dataset_for_path(os.path.join(self.path_dir_dataset_store, dataset_id))

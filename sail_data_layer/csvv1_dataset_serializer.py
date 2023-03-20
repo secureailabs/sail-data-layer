@@ -20,18 +20,23 @@ class Csvv1DatasetSerializer(BaseDatasetSerializer):
     # zipfile.ZIP_DEFLATED	Deflate	zlib
     # zipfile.ZIP_BZIP2	    Bzip2	bz2
     # zipfile.ZIP_LZMA	    LZMA	lzma
-    def __init__(self) -> None:
-        super().__init__("csvv1")
+    def __init__(self, path_dir_dataset_store=None) -> None:
+        if path_dir_dataset_store is None:
+            path_dir_dataset_store = os.environ.get("PATH_DIR_DATASET")
+            if path_dir_dataset_store is None:
+                raise Exception("Evironment variable: `PATH_DIR_DATASET` not set and none given")
 
-    def read_dataset(self, dataset_id) -> TabularDataset:
-        return self.read_dataset_for_path(os.path.join(self.path_dir_dataset_store, dataset_id))
+        super().__init__("csvv1", path_dir_dataset_store)
 
-    def read_dataset_for_path(self, path_dir_dataset_source) -> TabularDataset:
+    #    def read_dataset(self, dataset_id) -> TabularDataset:
+    #        return self.read_dataset_for_path(os.path.join(self.path_dir_dataset_store, dataset_id))
+
+    def read_dataset_for_path(self, path_dir_dataset_source: str) -> TabularDataset:
         # TODO check signature
 
         path_file_dataset_header = os.path.join(path_dir_dataset_source, "dataset_header.json")
-        path_file_data_model = os.path.join(path_dir_dataset_source, "data_model.zip")
-        path_file_data_content = os.path.join(path_dir_dataset_source, "data_content.zip")
+        path_file_data_model_zip = os.path.join(path_dir_dataset_source, "data_model.zip")
+        path_file_data_content_zip = os.path.join(path_dir_dataset_source, "data_content.zip")
         with open(path_file_dataset_header, "r") as file:
             header_dataset = json.load(file)
         data_federation_id = header_dataset["data_federation_id"]
@@ -39,12 +44,33 @@ class Csvv1DatasetSerializer(BaseDatasetSerializer):
         dataset_id = header_dataset["dataset_id"]
         dataset_name = header_dataset["dataset_name"]
         # TODO check header
-        with ZipFile(path_file_data_model) as archive_data_model:
+        with ZipFile(path_file_data_model_zip) as archive_data_model:
             data_model_tabular = TabularDatasetDataModel.from_dict(
                 json.loads(archive_data_model.read("data_model.json"))
             )
+
+        return self.read_dataset_for_data_content_zip(
+            data_federation_id,
+            data_federation_name,
+            dataset_id,
+            dataset_name,
+            path_file_data_content_zip,
+            data_model_tabular,
+        )
+
+    def read_dataset_for_data_content_zip(
+        self,
+        data_federation_id: str,
+        data_federation_name: str,
+        dataset_id: str,
+        dataset_name: str,
+        path_file_data_content_zip: str,
+        data_model_tabular: TabularDatasetDataModel,
+    ) -> TabularDataset:
+        # TODO check signature
+
         list_data_frame = []
-        with ZipFile(path_file_data_content) as archive_data_content:
+        with ZipFile(path_file_data_content_zip) as archive_data_content:
             for name_file in archive_data_content.namelist():
                 if not name_file.endswith(".csv"):
                     raise Exception()
