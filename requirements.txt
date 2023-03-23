@@ -4,3 +4,6 @@ pandas==1.4.1
 #TODO test dependancies
 pytest==6.2.4
 gdown==4.6.4
+
+#TODO packageing dependancies
+wheel==0.40.0
