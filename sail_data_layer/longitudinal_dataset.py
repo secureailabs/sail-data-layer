@@ -1,10 +1,10 @@
 from typing import Dict, List
 
+from sail_data_layer.aggregator import Aggregator
 from sail_data_layer.base_dataset import BaseDataset
 from sail_data_layer.data_frame import DataFrame
 from sail_data_layer.data_frame_data_model import DataFrameDataModel
-from sail_data_layer.longitudinal_dataset_data_model import \
-    LongitudinalDatasetDataModel
+from sail_data_layer.longitudinal_dataset_data_model import LongitudinalDatasetDataModel
 from sail_data_layer.series import Series
 from sail_data_layer.tabular_dataset import TabularDataset
 
@@ -33,17 +33,19 @@ class LongitudinalDataset(BaseDataset):
 
     def convert_to_data_frame(
         self,
-        data_frame_data_model: DataFrameDataModel,
+        name_data_frame: str,
+        list_aggregator: List[Aggregator],
     ) -> DataFrame:
 
         list_series = []
-        for series_name in data_frame_data_model.list_series_name:
-            data_model_series = data_frame_data_model.get_data_model_series(series_name)
+        for aggregator in list_aggregator:
+            data_model_series = None  # TODO data_frame_data_model.get_data_model_series(series_name)
             list_data = []
             for patient in self.__list_patient:
-                list_data.append(data_model_series.agregate(patient))
+                list_data.append(aggregator.agregate(patient))
             list_series.append(Series(self.dataset_id, data_model_series, list_data))
-        return DataFrame(self.dataset_id, data_frame_data_model.data_frame_name, list_series)
+        # TODO return DataFrame(self.dataset_id, data_frame_data_model.data_frame_name, list_series)
+        return DataFrame(self.dataset_id, name_data_frame, list_series)
 
     def compute_statistics(self) -> Dict:
         dict_measurement_statistics = {}

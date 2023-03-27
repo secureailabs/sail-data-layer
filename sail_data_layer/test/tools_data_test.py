@@ -11,7 +11,12 @@ from sail_data_layer.data_frame_data_model import DataFrameDataModel
 from sail_data_layer.fhirv1_dataset_serializer import Fhirv1DatasetSerializer
 from sail_data_layer.longitudinal_dataset import LongitudinalDataset
 from sail_data_layer.series import Series
-from sail_data_layer.series_data_model import SeriesDataModel
+from sail_data_layer.series_data_model import (
+    SeriesDataModel,
+    SeriesDataModelCategorical,
+    SeriesDataModelInterval,
+    SeriesDataModelUnique,
+)
 
 
 class ToolsDataTest:
@@ -77,59 +82,19 @@ class ToolsDataTest:
         list_series_name = data_frame_pandas.columns
         for series_name in list_series_name:
             if is_numeric_dtype(data_frame_pandas[series_name]):
-                data_model_series = SeriesDataModel.create_numerical(
-                    series_name,
-                    resolution=None,
-                    measurement_source_name="",
-                    type_agregator=SeriesDataModel.AgregatorCsv,
-                    unit="unitless",
-                )
+                data_model_series = SeriesDataModelInterval(series_name)
 
             elif is_string_dtype(data_frame_pandas[series_name]):
                 list_value = pandas.unique(data_frame_pandas[series_name])
                 if len(list_value) == len(data_frame_pandas[series_name]):
-                    data_model_series = SeriesDataModel.create_unique(
-                        series_name,
-                        type_agregator=SeriesDataModel.AgregatorCsv,
-                    )
-
+                    data_model_series = SeriesDataModelUnique(series_name)
                 else:
-                    data_model_series = SeriesDataModel.create_categorical(
-                        series_name,
-                        list_value,
-                        type_agregator=SeriesDataModel.AgregatorCsv,
-                    )
+                    data_model_series = SeriesDataModelCategorical(series_name, list_value)
 
             else:
                 raise ValueError("Neither numeric or string dtype")
             data_model_data_frame.add_data_model_series(data_model_series)
         list_reference = []
-
-        raise NotImplementedError()
-
-    @staticmethod
-    def from_array(dataset_id, series_name: str, array: np.ndarray) -> Series:
-        data_model_series = SeriesDataModel.create_numerical(
-            series_name,
-            resolution=None,
-            measurement_source_name="",
-            type_agregator=SeriesDataModel.AgregatorCsv,
-            unit="unitless",
-        )
-
-        raise NotImplementedError()
-
-        # return SeriesFederated(list_reference, data_model_series)
-
-    @staticmethod
-    def from_dict_array(series_name: str, dict_array: Dict[str, np.ndarray]) -> Series:
-        data_model_series = SeriesDataModel.create_numerical(
-            series_name,
-            resolution=None,
-            measurement_source_name="",
-            type_agregator=SeriesDataModel.AgregatorCsv,
-            unit="unitless",
-        )
 
         raise NotImplementedError()
 
