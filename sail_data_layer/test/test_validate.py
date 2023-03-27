@@ -20,7 +20,9 @@ def test_validate_csvv1():
     This test our ability to convert a longitudinal dataset to a data frame
     """
     path_dir_dataset_prepared = ToolsDataTest.get_path_dir_dataset_prepared()
-    path_dir_dataset = os.path.join(path_dir_dataset_prepared, "c75f663e-d9ee-4f1c-9458-79e92d1c126a")
+    header = ToolsDataTest.get_data_federation_header("c4kv_csvv1_210_1")
+    dataset_id = header["list_dataset_header"][0]["dataset_id"]
+    path_dir_dataset = os.path.join(path_dir_dataset_prepared, dataset_id)
     is_valid, list_problem = validate(path_dir_dataset)
     assert is_valid
     assert len(list_problem) == 0
@@ -32,7 +34,10 @@ def test_validate_data_content_zip_csvv1():
     This test our ability to convert a longitudinal dataset to a data frame
     """
     path_dir_dataset_prepared = ToolsDataTest.get_path_dir_dataset_prepared()
-    path_dir_dataset = os.path.join(path_dir_dataset_prepared, "c75f663e-d9ee-4f1c-9458-79e92d1c126a")
+    header = ToolsDataTest.get_data_federation_header("c4kv_csvv1_210_1")
+    dataset_id = header["list_dataset_header"][0]["dataset_id"]
+    path_dir_dataset = os.path.join(path_dir_dataset_prepared, dataset_id)
+
     path_file_data_model_zip = os.path.join(path_dir_dataset, "data_model.zip")
     path_file_data_content_zip = os.path.join(path_dir_dataset, "data_content.zip")
 

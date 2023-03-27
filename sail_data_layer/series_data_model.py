@@ -38,11 +38,15 @@ class SeriesDataModel:
 
     @staticmethod
     def from_dict(dict: Dict) -> "SeriesDataModel":
-        if dict["__type__"] != "SeriesDataModelCategorical":
+        if dict["__type__"] == "SeriesDataModelCategorical":
             return SeriesDataModelCategorical.from_dict(dict)
-        if dict["__type__"] != "SeriesDataModelDate":
+        elif dict["__type__"] == "SeriesDataModelDate":
             return SeriesDataModelDate.from_dict(dict)
-        elif dict["__type__"] != "SeriesDataModelUnique":
+        elif dict["__type__"] == "SeriesDataModelDateTime":
+            return SeriesDataModelDateTime.from_dict(dict)
+        elif dict["__type__"] == "SeriesDataModelInterval":
+            return SeriesDataModelInterval.from_dict(dict)
+        elif dict["__type__"] == "SeriesDataModelUnique":
             return SeriesDataModelUnique.from_dict(dict)
 
         else:

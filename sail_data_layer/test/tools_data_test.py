@@ -51,6 +51,13 @@ class ToolsDataTest:
         )
 
     @staticmethod
+    def get_data_federation_header(data_federation_name: str) -> Dict:
+        packager = DataFederationPackager()
+        path_dir = ToolsDataTest.get_path_dir_data_federation_packaged()
+        path_file_data_federation = os.path.join(path_dir, data_federation_name + ".zip")
+        return packager.get_data_federation_packaged_header(path_file_data_federation)
+
+    @staticmethod
     def get_path_dir_environment(environment_variable_name: str, check_exists: bool = True) -> str:
         environment_variable_value = os.environ.get(environment_variable_name)
         if environment_variable_value is None:

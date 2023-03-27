@@ -8,6 +8,7 @@ import pandas
 
 from sail_data_layer.base_dataset_serializer import BaseDatasetSerializer
 from sail_data_layer.data_frame import DataFrame
+from sail_data_layer.data_type_enum import DataTypeEnum
 from sail_data_layer.series_data_model import SeriesDataModel
 from sail_data_layer.tabular_dataset import TabularDataset
 from sail_data_layer.tabular_dataset_data_model import TabularDatasetDataModel
@@ -78,12 +79,13 @@ class Csvv1DatasetSerializer(BaseDatasetSerializer):
                 data_model_data_frame = data_model_tabular[data_frame_name]
                 dict_dtype = {}
                 for name_series in data_model_data_frame.list_series_name:
-                    if data_model_data_frame[name_series].type_data_level == SeriesDataModel.DataLevelUnique:
+                    if data_model_data_frame[name_series].data_type == DataTypeEnum.Unique:
                         dict_dtype[name_series] = str
-                    if data_model_data_frame[name_series].type_data_level == SeriesDataModel.DataLevelCategorical:
+                    if data_model_data_frame[name_series].data_type == DataTypeEnum.Categorical:
                         dict_dtype[name_series] = str
-                    if data_model_data_frame[name_series].type_data_level == SeriesDataModel.DataLevelInterval:
+                    if data_model_data_frame[name_series].data_type == DataTypeEnum.Interval:
                         dict_dtype[name_series] = float
+                    # TODO add the dates
 
                 list_data_frame.append(
                     DataFrame.from_csv_str(

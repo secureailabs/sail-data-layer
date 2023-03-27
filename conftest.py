@@ -65,17 +65,20 @@ def pytest_sessionfinish(session, exitstatus):
 def tabular_dataset_c4kv_csvv1_210_1() -> TabularDataset:
     serializer = Csvv1DatasetSerializer()
     path_dir_dataset_prepared = ToolsDataTest.get_path_dir_dataset_prepared()
-    path_file_dataset = os.path.join(path_dir_dataset_prepared, "c75f663e-d9ee-4f1c-9458-79e92d1c126a")
-    return serializer.read_dataset_for_path(path_file_dataset)  # TODO make it read from datafederation header
+    header = ToolsDataTest.get_data_federation_header("c4kv_csvv1_210_1")
+    dataset_id = header["list_dataset_header"][0]["dataset_id"]
+    path_file_dataset = os.path.join(path_dir_dataset_prepared, dataset_id)
+    return serializer.read_dataset_for_path(path_file_dataset)
 
 
 @pytest.fixture
 def longitudinal_dataset_r4sep2019_20_1() -> LongitudinalDataset:
-    # this fixture is a hack since the r4sep2019_fhirv1_60_3 datafederation has more than 1 dataset
     serializer = Fhirv1DatasetSerializer()
     path_dir_dataset_prepared = ToolsDataTest.get_path_dir_dataset_prepared()
-    path_file_dataset = os.path.join(path_dir_dataset_prepared, "a892ef90-4f6f-11ed-bdc3-0242ac120002")
-    return serializer.read_dataset_for_path(path_file_dataset)  # TODO make it read from datafederation header
+    header = ToolsDataTest.get_data_federation_header("r4sep2019_20_1")
+    dataset_id = header["list_dataset_header"][0]["dataset_id"]
+    path_file_dataset = os.path.join(path_dir_dataset_prepared, dataset_id)
+    return serializer.read_dataset_for_path(path_file_dataset)
 
 
 # @pytest.fixture
