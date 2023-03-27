@@ -4,7 +4,8 @@ from sail_data_layer.aggregator import Aggregator
 from sail_data_layer.base_dataset import BaseDataset
 from sail_data_layer.data_frame import DataFrame
 from sail_data_layer.data_frame_data_model import DataFrameDataModel
-from sail_data_layer.longitudinal_dataset_data_model import LongitudinalDatasetDataModel
+from sail_data_layer.longitudinal_dataset_data_model import \
+    LongitudinalDatasetDataModel
 from sail_data_layer.series import Series
 from sail_data_layer.tabular_dataset import TabularDataset
 
@@ -39,11 +40,10 @@ class LongitudinalDataset(BaseDataset):
 
         list_series = []
         for aggregator in list_aggregator:
-            data_model_series = None  # TODO data_frame_data_model.get_data_model_series(series_name)
             list_data = []
             for patient in self.__list_patient:
                 list_data.append(aggregator.agregate(patient))
-            list_series.append(Series(self.dataset_id, data_model_series, list_data))
+            list_series.append(Series(self.dataset_id, aggregator.series_data_model, list_data))
         # TODO return DataFrame(self.dataset_id, data_frame_data_model.data_frame_name, list_series)
         return DataFrame(self.dataset_id, name_data_frame, list_series)
 

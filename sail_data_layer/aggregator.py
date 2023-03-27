@@ -1,6 +1,8 @@
 import json
 import statistics
 
+from sail_data_layer.series_data_model import SeriesDataModel
+
 
 class Aggregator:
     AggregatorCsv = "AggregatorCsv"
@@ -18,11 +20,11 @@ class Aggregator:
     AggregatorCategoricalCountOccurance = "AggregatorCategoricalCountOccurance"
     AggregatorCategoricalMostFrequent = "AggregatorCategoricalMostFrequent"
 
-    def __init__(self, series_name: str, measurement_source_name: str, aggregator_type: str, unit: str) -> None:
-        self.series_name = series_name
+    def __init__(self, measurement_source_name: str, aggregator_type: str, series_data_model: SeriesDataModel) -> None:
+
         self.measurement_source_name = measurement_source_name
         self.aggregator_type = aggregator_type
-        self.unit = unit
+        self.series_data_model = series_data_model
 
     def agregate(self, patient):
         try:

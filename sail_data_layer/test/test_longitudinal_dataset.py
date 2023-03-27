@@ -6,7 +6,7 @@ from sail_data_layer.data_frame_data_model import DataFrameDataModel
 from sail_data_layer.data_type_enum import DataTypeEnum
 from sail_data_layer.longitudinal_dataset import LongitudinalDataset
 from sail_data_layer.series import Series
-from sail_data_layer.series_data_model import SeriesDataModel
+from sail_data_layer.series_data_model import SeriesDataModelInterval
 
 
 @pytest.mark.active
@@ -21,28 +21,25 @@ def test_convert_to_data_frame(longitudinal_dataset_r4sep2019_20_1: Longitudinal
     list_aggregator = []
     list_aggregator.append(
         Aggregator(
-            series_name="bmi_mean",
-            measurement_source_name="Observation:Body Mass Index",
-            aggregator_type=Aggregator.AggregatorIntervalMean,
-            unit="kg/m2",
+            "Observation:Body Mass Index",
+            Aggregator.AggregatorIntervalMean,
+            SeriesDataModelInterval("bmi_mean", unit="kg/m2"),
         )
     )
 
     list_aggregator.append(
         Aggregator(
-            series_name="bmi_first",
-            measurement_source_name="Observation:Body Mass Index",
-            aggregator_type=Aggregator.AggregatorIntervalFirstOccurance,
-            unit="kg/m2",
+            "Observation:Body Mass Index",
+            Aggregator.AggregatorIntervalFirstOccurance,
+            SeriesDataModelInterval("bmi_first", unit="kg/m2"),
         )
     )
 
     list_aggregator.append(
         Aggregator(
-            series_name="bmi_last",
-            measurement_source_name="Observation:Body Mass Index",
-            aggregator_type=Aggregator.AggregatorIntervalLastOccurance,
-            unit="kg/m2",
+            "Observation:Body Mass Index",
+            Aggregator.AggregatorIntervalLastOccurance,
+            SeriesDataModelInterval("bmi_last", unit="kg/m2"),
         )
     )
 
