@@ -72,10 +72,10 @@ def tabular_dataset_c4kv_csvv1_210_1() -> TabularDataset:
 
 
 @pytest.fixture
-def longitudinal_dataset_r4sep2019_20_1() -> LongitudinalDataset:
+def longitudinal_dataset_r4sep2019_fhirv1_20_1() -> LongitudinalDataset:
     serializer = Fhirv1DatasetSerializer()
     path_dir_dataset_prepared = ToolsDataTest.get_path_dir_dataset_prepared()
-    header = ToolsDataTest.get_data_federation_header("r4sep2019_20_1")
+    header = ToolsDataTest.get_data_federation_header("r4sep2019_fhirv1_20_1")
     dataset_id = header["list_dataset_header"][0]["dataset_id"]
     path_file_dataset = os.path.join(path_dir_dataset_prepared, dataset_id)
     return serializer.read_dataset_for_path(path_file_dataset)

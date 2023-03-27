@@ -10,11 +10,11 @@ from sail_data_layer.series_data_model import SeriesDataModelInterval
 
 
 @pytest.mark.active
-def test_convert_to_data_frame(longitudinal_dataset_r4sep2019_20_1: LongitudinalDataset):
+def test_convert_to_data_frame(longitudinal_dataset_r4sep2019_fhirv1_20_1: LongitudinalDataset):
     """
     This test our ability to convert a longitudinal dataset to a data frame
     """
-    dataset_longitudinal = longitudinal_dataset_r4sep2019_20_1
+    dataset_longitudinal = longitudinal_dataset_r4sep2019_fhirv1_20_1
 
     # Arrange
     data_frame_name = "data_frame_0"
@@ -45,7 +45,7 @@ def test_convert_to_data_frame(longitudinal_dataset_r4sep2019_20_1: Longitudinal
 
     # Act
     # TODO
-    data_frame = longitudinal_dataset_r4sep2019_20_1.convert_to_data_frame(data_frame_name, list_aggregator)
+    data_frame = dataset_longitudinal.convert_to_data_frame(data_frame_name, list_aggregator)
 
     name_series_1 = data_frame.list_series_name[1]
     name_series_2 = data_frame.list_series_name[2]
