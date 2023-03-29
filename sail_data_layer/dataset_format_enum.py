@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DatasetFormat(str, Enum):
+class DatasetFormatEnum(str, Enum):
     csvv1 = "csvv1"
     fhirv1 = "fhirv1"
 
@@ -11,8 +11,8 @@ class DatasetFormat(str, Enum):
     @staticmethod
     def parse_str(value: str):
         if value == "csvv1":
-            return DatasetFormat.csvv1
+            return DatasetFormatEnum.csvv1
         elif value == "fhirv1":
-            return DatasetFormat.fhirv1
+            return DatasetFormatEnum.fhirv1
         else:
             raise ValueError(f"Illegal enum value: {value}")
