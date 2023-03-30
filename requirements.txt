@@ -7,3 +7,4 @@ gdown==4.6.4
 
 #TODO packageing dependancies
 wheel==0.40.0
+twine==4.0.2
