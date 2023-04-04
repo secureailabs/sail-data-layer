@@ -1,15 +1,16 @@
-import json
-import statistics
+import uuid
+from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple
 
 from sail_data_layer.data_type_enum import DataTypeEnum
 
 
-class SeriesDataModel:
+class SeriesDataModel(ABC):
     def __init__(
         self,
         series_name: str,
         data_type: DataTypeEnum,
+        series_data_model_id: Optional[str] = None,
     ) -> None:
 
         # if type_data_level == SeriesDataModel.DataLevelCategorical:
@@ -21,6 +22,10 @@ class SeriesDataModel:
         #         raise ValueError(f"list_value can only contain unique values")
 
         self.__series_name = series_name
+        if series_data_model_id is None:
+            self.__series_data_model_id = str(uuid.uuid4())
+        else:
+            self.__series_data_model_id = series_data_model_id
         self.__data_type = data_type
 
     # properties
@@ -31,6 +36,10 @@ class SeriesDataModel:
     @property
     def data_type(self) -> DataTypeEnum:
         return self.__data_type
+
+    @property
+    def series_data_model_id(self) -> str:
+        return self.__series_data_model_id
 
     # methods
     def _get_problem_prefix(self, name_data_frame):
@@ -52,10 +61,19 @@ class SeriesDataModel:
         else:
             raise Exception(f"Unkown type {dict['__type__']}")
 
+    @abstractmethod
+    def to_dict(self) -> Dict:
+        raise NotImplementedError()
+
 
 class SeriesDataModelCategorical(SeriesDataModel):
-    def __init__(self, series_name: str, list_value: List[str]) -> None:
-        super().__init__(series_name, DataTypeEnum.Categorical)
+    def __init__(
+        self,
+        series_name: str,
+        list_value: List[str],
+        series_data_model_id: Optional[str] = None,
+    ) -> None:
+        super().__init__(series_name, DataTypeEnum.Categorical, series_data_model_id)
         if len(list_value) == 0:
             raise ValueError(f"Lenght of 'list_value' must be at least size 1")
         self.__list_value = list_value
@@ -90,6 +108,7 @@ class SeriesDataModelCategorical(SeriesDataModel):
         dict = {}
         dict["__type__"] = "SeriesDataModelCategorical"
         dict["series_name"] = self.series_name
+        dict["series_data_model_id"] = self.series_data_model_id
         dict["list_value"] = self.list_value
         return dict
 
@@ -100,18 +119,24 @@ class SeriesDataModelCategorical(SeriesDataModel):
 
         return SeriesDataModelCategorical(
             dict["series_name"],
+            dict["series_data_model_id"],
             dict["list_value"],
         )
 
 
 class SeriesDataModelDate(SeriesDataModel):
-    def __init__(self, series_name: str) -> None:
-        super().__init__(series_name, DataTypeEnum.Date)
+    def __init__(
+        self,
+        series_name: str,
+        series_data_model_id: Optional[str] = None,
+    ) -> None:
+        super().__init__(series_name, DataTypeEnum.Date, series_data_model_id)
 
     def to_dict(self) -> Dict:
         dict = {}
         dict["__type__"] = "SeriesDataModelDate"
         dict["series_name"] = self.series_name
+        dict["series_data_model_id"] = self.series_data_model_id
         return dict
 
     @staticmethod
@@ -121,17 +146,23 @@ class SeriesDataModelDate(SeriesDataModel):
 
         return SeriesDataModelDate(
             dict["series_name"],
+            dict["series_data_model_id"],
         )
 
 
 class SeriesDataModelDateTime(SeriesDataModel):
-    def __init__(self, series_name: str) -> None:
-        super().__init__(series_name, DataTypeEnum.Datetime)
+    def __init__(
+        self,
+        series_name: str,
+        series_data_model_id: Optional[str] = None,
+    ) -> None:
+        super().__init__(series_name, DataTypeEnum.Datetime, series_data_model_id)
 
     def to_dict(self) -> Dict:
         dict = {}
         dict["__type__"] = "SeriesDataModelDateTime"
         dict["series_name"] = self.series_name
+        dict["series_data_model_id"] = self.series_data_model_id
         return dict
 
     @staticmethod
@@ -141,6 +172,7 @@ class SeriesDataModelDateTime(SeriesDataModel):
 
         return SeriesDataModelDateTime(
             dict["series_name"],
+            dict["series_data_model_id"],
         )
 
 
@@ -148,16 +180,14 @@ class SeriesDataModelInterval(SeriesDataModel):
     def __init__(
         self,
         series_name: str,
+        series_data_model_id: Optional[str] = None,
         *,
         unit: str = "unitless",
         min: Optional[float] = None,
         max: Optional[float] = None,
         resolution: Optional[float] = None,
     ) -> None:
-        super().__init__(
-            series_name,
-            DataTypeEnum.Interval,
-        )
+        super().__init__(series_name, DataTypeEnum.Interval, series_data_model_id)
         self.__unit = unit
         self.__min = min
         self.__max = max
@@ -219,6 +249,7 @@ class SeriesDataModelInterval(SeriesDataModel):
         dict = {}
         dict["__type__"] = "SeriesDataModelInterval"
         dict["series_name"] = self.series_name
+        dict["series_data_model_id"] = self.series_data_model_id
         return dict
 
     @staticmethod
@@ -228,12 +259,17 @@ class SeriesDataModelInterval(SeriesDataModel):
 
         return SeriesDataModelInterval(
             dict["series_name"],
+            dict["series_data_model_id"],  # TODO pass other parameters
         )
 
 
 class SeriesDataModelUnique(SeriesDataModel):
-    def __init__(self, series_name: str) -> None:
-        super().__init__(series_name, DataTypeEnum.Unique)
+    def __init__(
+        self,
+        series_name: str,
+        series_data_model_id: Optional[str] = None,
+    ) -> None:
+        super().__init__(series_name, DataTypeEnum.Unique, series_data_model_id)
 
     def validate(self, name_data_frame, series, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
         problem_prefix = self._get_problem_prefix(name_data_frame)
@@ -251,6 +287,7 @@ class SeriesDataModelUnique(SeriesDataModel):
         dict = {}
         dict["__type__"] = "SeriesDataModelUnique"
         dict["series_name"] = self.series_name
+        dict["series_data_model_id"] = self.series_data_model_id
         return dict
 
     @staticmethod
@@ -260,4 +297,5 @@ class SeriesDataModelUnique(SeriesDataModel):
 
         return SeriesDataModelUnique(
             dict["series_name"],
+            dict["series_data_model_id"],
         )
