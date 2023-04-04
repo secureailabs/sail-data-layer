@@ -79,13 +79,20 @@ class Csvv1DatasetSerializer(BaseDatasetSerializer):
                 data_model_data_frame = data_model_tabular[data_frame_name]
                 dict_dtype = {}
                 for name_series in data_model_data_frame.list_series_name:
-                    if data_model_data_frame[name_series].data_type == DataTypeEnum.Unique:
-                        dict_dtype[name_series] = str
                     if data_model_data_frame[name_series].data_type == DataTypeEnum.Categorical:
                         dict_dtype[name_series] = str
-                    if data_model_data_frame[name_series].data_type == DataTypeEnum.Interval:
+                    elif data_model_data_frame[name_series].data_type == DataTypeEnum.Date:
+                        # they are read as str but later converted to datetime by the from_pandas method
+                        dict_dtype[name_series] = str
+                    elif data_model_data_frame[name_series].data_type == DataTypeEnum.Datetime:
+                        # they are read as str but later converted to datetime by the from_pandas method
+                        dict_dtype[name_series] = str
+                    elif data_model_data_frame[name_series].data_type == DataTypeEnum.Interval:
                         dict_dtype[name_series] = float
-                    # TODO add the dates
+                    elif data_model_data_frame[name_series].data_type == DataTypeEnum.Unique:
+                        dict_dtype[name_series] = str
+                    else:
+                        raise RuntimeError()
 
                 list_data_frame.append(
                     DataFrame.from_csv_str(

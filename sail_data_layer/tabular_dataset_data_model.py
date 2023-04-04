@@ -1,11 +1,23 @@
-from typing import Dict, List, Tuple
+import uuid
+from typing import Dict, List, Optional, Tuple
 
 from sail_data_layer.data_frame_data_model import DataFrameDataModel
 
 
 class TabularDatasetDataModel:
-    def __init__(self) -> None:
-        self.__dict_data_frame_data_model = {}  # This could be an ordered dict but they do not map to json by default
+    def __init__(
+        self,
+        tabular_dataset_data_model_id: Optional[str] = None,
+        list_data_frame_data_model: List[DataFrameDataModel] = [],
+    ) -> None:
+        if tabular_dataset_data_model_id is None:
+            self.__tabular_dataset_data_model_id = str(uuid.uuid4())
+        else:
+            self.__tabular_dataset_data_model_id = tabular_dataset_data_model_id
+        self.__list_data_frame_data_model: List[DataFrameDataModel] = []
+        self.__dict_data_frame_data_model = {}
+        for data_frame_data_model in list_data_frame_data_model:
+            self._add_data_frame_data_model(data_frame_data_model)
 
     # index section start
     def __delitem__(self, key) -> None:
@@ -22,9 +34,16 @@ class TabularDatasetDataModel:
 
     # property section start
     @property
+    def tabular_dataset_data_model_id(self) -> str:
+        return self.__tabular_dataset_data_model_id
+
+    @property
     def list_data_frame_name(self) -> List[str]:
         return list(self.__dict_data_frame_data_model.keys())
 
+    @property
+    def list_data_frame_data_model(self) -> List[DataFrameDataModel]:
+        return self.__list_data_frame_data_model.copy()
     # property section end
 
     # TODO type dataset without avoiding cyclic dependance USE interface!
@@ -52,27 +71,30 @@ class TabularDatasetDataModel:
             raise Exception(f"No such data_frame_model: {data_frame_name}")
         return self.__dict_data_frame_data_model[data_frame_name]
 
-    def add_data_frame_data_model(self, data_frame_data_model: DataFrameDataModel) -> None:
+    def _add_data_frame_data_model(self, data_frame_data_model: DataFrameDataModel) -> None:
         if data_frame_data_model.data_frame_name in self.__dict_data_frame_data_model:
             raise Exception(f"Duplicate data_frame_model: {data_frame_data_model.data_frame_name}")
+        self.__list_data_frame_data_model.append(data_frame_data_model)
         self.__dict_data_frame_data_model[data_frame_data_model.data_frame_name] = data_frame_data_model
+
+    def add_data_frame_data_model(self, data_frame_data_model: DataFrameDataModel) -> "TabularDatasetDataModel":
+        return TabularDatasetDataModel(self.__tabular_dataset_data_model_id, self.__list_data_frame_data_model)
 
     def to_dict(self) -> Dict:
         # TODO TECHdebt dict_data_frame_data_model makes more sense dict_data_model_data_frame is a legacy string but
         # all the datasets where generated with the old code so lets keep the seriealizer as is
-        dict = {}
-        dict["__type__"] = "TabularDatasetDataModel"
-        dict["dict_data_model_data_frame"] = {}
-        for table_id, data_frame_data_model in self.__dict_data_frame_data_model.items():
-            dict["dict_data_model_data_frame"][table_id] = data_frame_data_model.to_dict()
-        return dict
+        dict_json = {}
+        dict_json["__type__"] = "TabularDatasetDataModel"
+        dict_json["tabular_dataset_data_model_id"] = self.__tabular_dataset_data_model_id
+        dict_json["list_data_frame_data_model"] = []
+        for data_frame_data_model in self.__list_data_frame_data_model:
+            dict_json["list_data_frame_data_model"].append(data_frame_data_model.to_dict())
+        return dict_json
 
     @staticmethod
-    def from_dict(dict: Dict) -> "TabularDatasetDataModel":
-        data_model_tabular = TabularDatasetDataModel()
-        for table_id, data_frame_data_model in dict["dict_data_model_data_frame"].items():
-            data_model_tabular.__dict_data_frame_data_model[table_id] = DataFrameDataModel.from_dict(
-                data_frame_data_model
-            )
+    def from_dict(dict_json: Dict) -> "TabularDatasetDataModel":
+        list_data_frame_data_model = []
+        for data_frame_data_model in dict_json["list_data_frame_data_model"]:
+            list_data_frame_data_model.append(DataFrameDataModel.from_dict(data_frame_data_model))
 
-        return data_model_tabular
+        return TabularDatasetDataModel(dict_json["tabular_dataset_data_model_id"], list_data_frame_data_model)

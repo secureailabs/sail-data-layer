@@ -1,12 +1,25 @@
-from typing import Dict, List, Tuple
+import uuid
+from typing import Dict, List, Optional, Tuple
 
 from sail_data_layer.series_data_model import SeriesDataModel
 
 
 class DataFrameDataModel:
-    def __init__(self, data_frame_name) -> None:
-        self.data_frame_name = data_frame_name
-        self.dict_data_model_series = {}  # This could be an ordered dict but they do not map to json by default
+    def __init__(
+        self,
+        data_frame_name: str,
+        data_frame_data_model_id: Optional[str] = None,
+        list_series_data_model: List[SeriesDataModel] = [],
+    ) -> None:
+        self.__data_frame_name = data_frame_name
+        if data_frame_data_model_id is None:
+            self.__data_frame_data_model_id = str(uuid.uuid4())
+        else:
+            self.__data_frame_data_model_id = data_frame_data_model_id
+        self.__list_series_data_model: List[SeriesDataModel] = []
+        self.__dict_series_data_model = {}  # TODO This could be an ordered dict
+        for series_data_model in list_series_data_model:
+            self._add_series_data_model(series_data_model)
 
     # index section start
     def __delitem__(self, key) -> None:
@@ -14,7 +27,7 @@ class DataFrameDataModel:
 
     def __getitem__(self, key) -> SeriesDataModel:
         # TODO check key typing
-        return self.get_data_model_series(key)
+        return self.get_series_data_model(key)
 
     def __setitem__(self, key, value):
         raise NotImplementedError()
@@ -23,10 +36,23 @@ class DataFrameDataModel:
 
     # property section start
     @property
+    def data_frame_name(self) -> str:
+        return self.__data_frame_name
+
+    @property
+    def data_frame_data_model_id(self) -> str:
+        return self.__data_frame_data_model_id
+
+    @property
     def list_series_name(self) -> List[str]:
-        return list(self.dict_data_model_series.keys())
+        return list(self.__dict_series_data_model.keys())
+
+    @property
+    def list_series_data_model(self) -> List[SeriesDataModel]:
+        return self.__list_series_data_model.copy()
 
     # property section end
+
     # TODO type dataframe without avoiding cyclic dependance USE interface!
     def validate(self, data_frame, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
         # TODO validate that patient id and dataset id series are present?
@@ -51,30 +77,32 @@ class DataFrameDataModel:
 
         return len(list_problem) == 0, list_problem
 
-    def get_data_model_series(self, series_name: str) -> SeriesDataModel:
-        if series_name not in self.dict_data_model_series:
+    def get_series_data_model(self, series_name: str) -> SeriesDataModel:
+        if series_name not in self.__dict_series_data_model:
             raise Exception(f"No such series: {series_name}")
-        return self.dict_data_model_series[series_name]
+        return self.__dict_series_data_model[series_name]
 
-    def add_data_model_series(self, data_model_series: SeriesDataModel) -> None:
-        if data_model_series.series_name in self.dict_data_model_series:
-            raise Exception(f"Duplicate series: {data_model_series.series_name}")
-        self.dict_data_model_series[data_model_series.series_name] = data_model_series
+    def _add_series_data_model(self, series_data_model: SeriesDataModel) -> None:
+        if series_data_model.series_name in self.__dict_series_data_model:
+            raise Exception(f"Duplicate series: {series_data_model.series_name}")
+        self.__list_series_data_model.append(series_data_model)
+        self.__dict_series_data_model[series_data_model.series_name] = series_data_model
 
     def to_dict(self) -> Dict:
-        dict = {}
-        dict["__type__"] = "DataFrameDataModel"
-        dict["data_frame_name"] = self.data_frame_name
-        dict["dict_data_model_series"] = {}
-        for name_feature in self.dict_data_model_series:
-            dict["dict_data_model_series"][name_feature] = self.get_data_model_series(name_feature).to_dict()
-        return dict
+        dict_json = {}
+        dict_json["__type__"] = "DataFrameDataModel"
+        dict_json["data_frame_name"] = self.data_frame_name
+        dict_json["data_frame_data_model_id"] = self.data_frame_data_model_id
+        dict_json["list_series_data_model"] = []  # TODO we want to have a list here not a dict
+        for series_data_model in self.__list_series_data_model:
+            dict_json["list_series_data_model"].append(series_data_model.to_dict())
+        return dict_json
 
     @staticmethod
     def from_dict(dict_json: Dict) -> "DataFrameDataModel":
-        data_model_tabular = DataFrameDataModel(dict_json["data_frame_name"])
-        for name_feature in dict_json["dict_data_model_series"]:
-            data_model_tabular.dict_data_model_series[name_feature] = SeriesDataModel.from_dict(
-                dict_json["dict_data_model_series"][name_feature]
-            )
-        return data_model_tabular
+        list_series_data_model = []
+        for dict_series_json in dict_json["list_series_data_model"]:
+            list_series_data_model.append(SeriesDataModel.from_dict(dict_series_json))
+        return DataFrameDataModel(
+            dict_json["data_frame_name"], dict_json["data_frame_data_model_id"], list_series_data_model
+        )

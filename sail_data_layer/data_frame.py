@@ -25,7 +25,7 @@ class DataFrame(DataFramePandas):
             raise ValueError(f"Duplicate series: {series.series_name}")
         # TODO overload this indexer as well !!!!
         super().__setitem__(series.series_name, series)
-        self.data_frame_data_model.add_data_model_series(series.data_model_series)
+        self.data_frame_data_model._add_series_data_model(series.data_model_series)
 
     def get_series(self, series_name: str) -> Series:
         if series_name not in self.list_series_name:
