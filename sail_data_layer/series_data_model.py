@@ -250,6 +250,10 @@ class SeriesDataModelInterval(SeriesDataModel):
         dict["__type__"] = "SeriesDataModelInterval"
         dict["series_name"] = self.series_name
         dict["series_data_model_id"] = self.series_data_model_id
+        dict["unit"] = self.unit
+        dict["min"] = self.min
+        dict["max"] = self.max
+        dict["resolution"] = self.resolution
         return dict
 
     @staticmethod
@@ -260,6 +264,10 @@ class SeriesDataModelInterval(SeriesDataModel):
         return SeriesDataModelInterval(
             dict["series_name"],
             dict["series_data_model_id"],  # TODO pass other parameters
+            unit=dict["unit"],
+            min=dict["min"],
+            max=dict["max"],
+            resolution=dict["resolution"],
         )
 
 
