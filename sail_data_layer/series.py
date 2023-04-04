@@ -1,5 +1,6 @@
 from typing import List
 
+import pandas as pd
 from pandas import Series as SeriesPandas
 
 from sail_data_layer.data_type_enum import DataTypeEnum
@@ -40,10 +41,23 @@ class Series(SeriesPandas):
         data_model_series: SeriesDataModel,
         series_pandas: SeriesPandas,
     ) -> "Series":
+        if data_model_series.data_type == DataTypeEnum.Date:
+            # this code is a bit weird but at loading string series None are replaced by float nans, those nans (float type) cannot be directly filled with None for strange pandas reasons
+            series_pandas = series_pandas.fillna("")
+            series_pandas = series_pandas.replace(r"^\s*$", None, regex=True)
+            series_pandas = pd.to_datetime(series_pandas, format="%Y-%m-%d")
+
+        if data_model_series.data_type == DataTypeEnum.Datetime:
+            # this code is a bit weird but at loading string series None are replaced by float nans, those nans (float type) cannot be directly filled with None for strange pandas reasons
+            series_pandas = series_pandas.fillna("")
+            series_pandas = series_pandas.replace(r"^\s*$", None, regex=True)
+            series_pandas = pd.to_datetime(series_pandas, format="%Y-%m-%d %H:%M:%S %z")
+
         if data_model_series.data_type == DataTypeEnum.Unique:
             # this code is a bit weird but at loading string series None are replaced by float nans, those nans (float type) cannot be directly filled with None for strange pandas reasons
             series_pandas = series_pandas.fillna("")
             series_pandas = series_pandas.replace(r"^\s*$", None, regex=True)
+
         if data_model_series.data_type == DataTypeEnum.Categorical:
             series_pandas = series_pandas.fillna("")
             series_pandas = series_pandas.replace(r"^\s*$", None, regex=True)

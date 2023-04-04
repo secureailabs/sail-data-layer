@@ -1,10 +1,11 @@
 import json
 import random
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 from typing import List
 
 import numpy as np
+import pytz
 from pandas import DataFrame, Series
 
 
@@ -50,6 +51,23 @@ class GeneratorDateNormal(GeneratorBase):
     def generate_instance(self, instance: dict) -> str:
         random_days = timedelta(random.normalvariate(0, self.standard_deviation_days))
         return (self.datetime_mean + random_days).strftime("%Y-%m-%d")
+
+
+class GeneratorDatetimeNormal(GeneratorBase):
+    def __init__(
+        self, name_series: str, datetime_mean: datetime, timezone: tzinfo, standard_deviation_days: float
+    ) -> None:
+        super().__init__(name_series)
+        print(name_series)
+        self.datetime_mean = datetime_mean
+        self.timezone = timezone
+        self.standard_deviation_days = standard_deviation_days
+
+    def generate_instance(self, instance: dict) -> str:
+        random_days = timedelta(random.normalvariate(0, self.standard_deviation_days))
+        datetime_random = self.datetime_mean + random_days
+        datetime_random = datetime_random.replace(tzinfo=self.timezone)
+        return datetime_random.strftime("%Y-%m-%d %H:%M:%S %z")
 
 
 class GeneratorIntervalNormal(GeneratorBase):

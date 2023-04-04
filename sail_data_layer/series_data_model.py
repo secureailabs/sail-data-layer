@@ -137,14 +137,26 @@ class SeriesDataModelDate(SeriesDataModel):
     def validate(self, name_data_frame: str, series, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
         problem_prefix = self._get_problem_prefix(name_data_frame)
 
-        # check that the series.dtype is string
+        # check that the series.dtype is timestamp
         # check that every value is out of the list of values or None
+        # check that every value is a date and not a datetime
+        # check that not timezone is specified
         for index, value in series.items():  # TODO index should be patient_id
-            if not isinstance(value, datetime):  # TODO check if this is correct
-                if value is not None:  # TODO currently every value is allowed to be None
+            if value is not None:  # TODO currently every value is allowed to be None
+                if not isinstance(value, datetime):  # TODO check if this is correct
                     list_problem.append(
                         problem_prefix
-                        + f" at index {index} value is not of type string but of type {str(type(value))} while date model specifies this is series as Date"
+                        + f" at index {index} value is not of type datetime but of type {str(type(value))} while date model specifies this is series as Date"
+                    )
+
+                if value.hour != 0 or value.minute != 0 or value.second != 0 or value.microsecond != 0:
+                    list_problem.append(
+                        problem_prefix + f" at index {index} value is not a date but a datetime with value {str(value)}"
+                    )
+                if value.tzinfo is not None:
+                    list_problem.append(
+                        problem_prefix
+                        + f" at index {index} value has a timezone specified with value {str(value.tzinfo)}"
                     )
         return len(list_problem) == 0, list_problem
 
@@ -173,6 +185,28 @@ class SeriesDataModelDateTime(SeriesDataModel):
         series_data_model_id: Optional[str] = None,
     ) -> None:
         super().__init__(series_name, DataTypeEnum.Datetime, series_data_model_id)
+
+    # TODO type dataframe without avoiding cyclic dependance USE interface!
+    def validate(self, name_data_frame: str, series, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
+        problem_prefix = self._get_problem_prefix(name_data_frame)
+
+        # check that the series.dtype is timestamp
+        # check that every value is out of the list of values or None
+        # check that a timezone is specified
+        for index, value in series.items():  # TODO index should be patient_id
+            if value is not None:  # TODO currently every value is allowed to be None
+                if not isinstance(value, datetime):  # TODO check if this is correct
+                    list_problem.append(
+                        problem_prefix
+                        + f" at index {index} value is not of type datatime but of type {str(type(value))} while date model specifies this is series as DateTime"
+                    )
+
+                if value.tzinfo is None:
+                    list_problem.append(
+                        problem_prefix
+                        + f" at index {index} value has no timezone specified while date model specifies this is series as DateTime."
+                    )
+        return len(list_problem) == 0, list_problem
 
     def to_dict(self) -> Dict:
         dict = {}
