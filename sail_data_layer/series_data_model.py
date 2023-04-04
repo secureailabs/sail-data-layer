@@ -1,5 +1,6 @@
 import uuid
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 from sail_data_layer.data_type_enum import DataTypeEnum
@@ -108,8 +109,8 @@ class SeriesDataModelCategorical(SeriesDataModel):
         dict = {}
         dict["__type__"] = "SeriesDataModelCategorical"
         dict["series_name"] = self.series_name
-        dict["series_data_model_id"] = self.series_data_model_id
         dict["list_value"] = self.list_value
+        dict["series_data_model_id"] = self.series_data_model_id
         return dict
 
     @staticmethod
@@ -119,8 +120,8 @@ class SeriesDataModelCategorical(SeriesDataModel):
 
         return SeriesDataModelCategorical(
             dict["series_name"],
-            dict["series_data_model_id"],
             dict["list_value"],
+            dict["series_data_model_id"],
         )
 
 
@@ -131,6 +132,21 @@ class SeriesDataModelDate(SeriesDataModel):
         series_data_model_id: Optional[str] = None,
     ) -> None:
         super().__init__(series_name, DataTypeEnum.Date, series_data_model_id)
+
+    # TODO type dataframe without avoiding cyclic dependance USE interface!
+    def validate(self, name_data_frame: str, series, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
+        problem_prefix = self._get_problem_prefix(name_data_frame)
+
+        # check that the series.dtype is string
+        # check that every value is out of the list of values or None
+        for index, value in series.items():  # TODO index should be patient_id
+            if not isinstance(value, datetime):  # TODO check if this is correct
+                if value is not None:  # TODO currently every value is allowed to be None
+                    list_problem.append(
+                        problem_prefix
+                        + f" at index {index} value is not of type string but of type {str(type(value))} while date model specifies this is series as Date"
+                    )
+        return len(list_problem) == 0, list_problem
 
     def to_dict(self) -> Dict:
         dict = {}

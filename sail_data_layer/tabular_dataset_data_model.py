@@ -41,6 +41,9 @@ class TabularDatasetDataModel:
     def list_data_frame_name(self) -> List[str]:
         return list(self.__dict_data_frame_data_model.keys())
 
+    @property
+    def list_data_frame_data_model(self) -> List[DataFrameDataModel]:
+        return self.__list_data_frame_data_model.copy()
     # property section end
 
     # TODO type dataset without avoiding cyclic dependance USE interface!

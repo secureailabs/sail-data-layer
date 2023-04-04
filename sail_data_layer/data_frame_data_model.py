@@ -47,6 +47,10 @@ class DataFrameDataModel:
     def list_series_name(self) -> List[str]:
         return list(self.__dict_series_data_model.keys())
 
+    @property
+    def list_series_data_model(self) -> List[SeriesDataModel]:
+        return self.__list_series_data_model.copy()
+
     # property section end
 
     # TODO type dataframe without avoiding cyclic dependance USE interface!
