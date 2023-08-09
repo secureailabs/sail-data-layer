@@ -44,6 +44,7 @@ class TabularDatasetDataModel:
     @property
     def list_data_frame_data_model(self) -> List[DataFrameDataModel]:
         return self.__list_data_frame_data_model.copy()
+
     # property section end
 
     # TODO type dataset without avoiding cyclic dependance USE interface!
@@ -94,7 +95,7 @@ class TabularDatasetDataModel:
     @staticmethod
     def from_dict(dict_json: Dict) -> "TabularDatasetDataModel":
         list_data_frame_data_model = []
-        for data_frame_data_model in dict_json["list_data_frame_data_model"]:
+        for data_frame_data_model in dict_json["dataframes"]:
             list_data_frame_data_model.append(DataFrameDataModel.from_dict(data_frame_data_model))
 
-        return TabularDatasetDataModel(dict_json["tabular_dataset_data_model_id"], list_data_frame_data_model)
+        return TabularDatasetDataModel(dict_json["id"], list_data_frame_data_model)

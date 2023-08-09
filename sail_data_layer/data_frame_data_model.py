@@ -77,16 +77,16 @@ class DataFrameDataModel:
 
         return len(list_problem) == 0, list_problem
 
-    def get_series_data_model(self, series_name: str) -> SeriesDataModel:
-        if series_name not in self.__dict_series_data_model:
-            raise Exception(f"No such series: {series_name}")
-        return self.__dict_series_data_model[series_name]
+    def get_series_data_model(self, name: str) -> SeriesDataModel:
+        if name not in self.__dict_series_data_model:
+            raise Exception(f"No such series: {name}")
+        return self.__dict_series_data_model[name]
 
     def _add_series_data_model(self, series_data_model: SeriesDataModel) -> None:
-        if series_data_model.series_name in self.__dict_series_data_model:
-            raise Exception(f"Duplicate series: {series_data_model.series_name}")
+        if series_data_model.name in self.__dict_series_data_model:
+            raise Exception(f"Duplicate series: {series_data_model.name}")
         self.__list_series_data_model.append(series_data_model)
-        self.__dict_series_data_model[series_data_model.series_name] = series_data_model
+        self.__dict_series_data_model[series_data_model.name] = series_data_model
 
     def to_dict(self) -> Dict:
         dict_json = {}
@@ -101,8 +101,6 @@ class DataFrameDataModel:
     @staticmethod
     def from_dict(dict_json: Dict) -> "DataFrameDataModel":
         list_series_data_model = []
-        for dict_series_json in dict_json["list_series_data_model"]:
+        for dict_series_json in dict_json["series"]:
             list_series_data_model.append(SeriesDataModel.from_dict(dict_series_json))
-        return DataFrameDataModel(
-            dict_json["data_frame_name"], dict_json["data_frame_data_model_id"], list_series_data_model
-        )
+        return DataFrameDataModel(dict_json["name"], dict_json["id"], list_series_data_model)

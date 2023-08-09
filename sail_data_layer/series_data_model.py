@@ -9,9 +9,9 @@ from sail_data_layer.data_type_enum import DataTypeEnum
 class SeriesDataModel(ABC):
     def __init__(
         self,
-        series_name: str,
+        name: str,
         data_type: DataTypeEnum,
-        series_data_model_id: Optional[str] = None,
+        series_id: Optional[str] = None,
     ) -> None:
 
         # if type_data_level == SeriesDataModel.DataLevelCategorical:
@@ -22,45 +22,45 @@ class SeriesDataModel(ABC):
         #     if len(list_value) != len(set(list_value)):
         #         raise ValueError(f"list_value can only contain unique values")
 
-        self.__series_name = series_name
-        if series_data_model_id is None:
-            self.__series_data_model_id = str(uuid.uuid4())
+        self.__name = name
+        if id is None:
+            self.series_id = str(uuid.uuid4())
         else:
-            self.__series_data_model_id = series_data_model_id
+            self.series_id = series_id
         self.__data_type = data_type
 
     # properties
     @property
-    def series_name(self) -> str:
-        return self.__series_name
+    def name(self) -> str:
+        return self.__name
 
     @property
     def data_type(self) -> DataTypeEnum:
         return self.__data_type
 
     @property
-    def series_data_model_id(self) -> str:
-        return self.__series_data_model_id
+    def id(self) -> str:
+        return self.id
 
     # methods
     def _get_problem_prefix(self, name_data_frame):
-        return f"In data frame with name {name_data_frame} in series with name {self.series_name} "
+        return f"In data frame with name {name_data_frame} in series with name {self.name} "
 
     @staticmethod
     def from_dict(dict: Dict) -> "SeriesDataModel":
-        if dict["__type__"] == "SeriesDataModelCategorical":
+        if dict["series_schema"]["type"] == "SeriesDataModelCategorical":
             return SeriesDataModelCategorical.from_dict(dict)
-        elif dict["__type__"] == "SeriesDataModelDate":
+        elif dict["series_schema"]["type"] == "SeriesDataModelDate":
             return SeriesDataModelDate.from_dict(dict)
-        elif dict["__type__"] == "SeriesDataModelDateTime":
+        elif dict["series_schema"]["type"] == "SeriesDataModelDateTime":
             return SeriesDataModelDateTime.from_dict(dict)
-        elif dict["__type__"] == "SeriesDataModelInterval":
+        elif dict["series_schema"]["type"] == "SeriesDataModelInterval":
             return SeriesDataModelInterval.from_dict(dict)
-        elif dict["__type__"] == "SeriesDataModelUnique":
+        elif dict["series_schema"]["type"] == "SeriesDataModelUnique":
             return SeriesDataModelUnique.from_dict(dict)
 
         else:
-            raise Exception(f"Unkown type {dict['__type__']}")
+            raise Exception(f"Unkown type {0}", dict["series_schema"]["type"])
 
     @abstractmethod
     def to_dict(self) -> Dict:
@@ -70,11 +70,11 @@ class SeriesDataModel(ABC):
 class SeriesDataModelCategorical(SeriesDataModel):
     def __init__(
         self,
-        series_name: str,
+        name: str,
         list_value: List[str],
-        series_data_model_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
-        super().__init__(series_name, DataTypeEnum.Categorical, series_data_model_id)
+        super().__init__(name, DataTypeEnum.Categorical, id)
         if len(list_value) == 0:
             raise ValueError(f"Lenght of 'list_value' must be at least size 1")
         self.__list_value = list_value
@@ -107,31 +107,31 @@ class SeriesDataModelCategorical(SeriesDataModel):
 
     def to_dict(self) -> Dict:
         dict = {}
-        dict["__type__"] = "SeriesDataModelCategorical"
-        dict["series_name"] = self.series_name
+        dict["series_schema"]["type"] = "SeriesDataModelCategorical"
+        dict["name"] = self.name
         dict["list_value"] = self.list_value
-        dict["series_data_model_id"] = self.series_data_model_id
+        dict["id"] = self.id
         return dict
 
     @staticmethod
     def from_dict(dict: Dict) -> "SeriesDataModelCategorical":
-        if dict["__type__"] != "SeriesDataModelCategorical":
+        if dict["series_schema"]["type"] != "SeriesDataModelCategorical":
             raise Exception(f"invalid type {dict['__type__']}")
 
         return SeriesDataModelCategorical(
-            dict["series_name"],
-            dict["list_value"],
-            dict["series_data_model_id"],
+            dict["name"],
+            dict["series_schema"]["list_value"],
+            dict["id"],
         )
 
 
 class SeriesDataModelDate(SeriesDataModel):
     def __init__(
         self,
-        series_name: str,
-        series_data_model_id: Optional[str] = None,
+        name: str,
+        id: Optional[str] = None,
     ) -> None:
-        super().__init__(series_name, DataTypeEnum.Date, series_data_model_id)
+        super().__init__(name, DataTypeEnum.Date, id)
 
     # TODO type dataframe without avoiding cyclic dependance USE interface!
     def validate(self, name_data_frame: str, series, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
@@ -162,29 +162,29 @@ class SeriesDataModelDate(SeriesDataModel):
 
     def to_dict(self) -> Dict:
         dict = {}
-        dict["__type__"] = "SeriesDataModelDate"
-        dict["series_name"] = self.series_name
-        dict["series_data_model_id"] = self.series_data_model_id
+        dict["series_schema"]["type"] = "SeriesDataModelDate"
+        dict["name"] = self.name
+        dict["id"] = self.id
         return dict
 
     @staticmethod
     def from_dict(dict: Dict) -> "SeriesDataModelDate":
-        if dict["__type__"] != "SeriesDataModelDate":
+        if dict["series_schema"]["type"] != "SeriesDataModelDate":
             raise Exception(f"invalid type {dict['__type__']}")
 
         return SeriesDataModelDate(
-            dict["series_name"],
-            dict["series_data_model_id"],
+            dict["name"],
+            dict["id"],
         )
 
 
 class SeriesDataModelDateTime(SeriesDataModel):
     def __init__(
         self,
-        series_name: str,
-        series_data_model_id: Optional[str] = None,
+        name: str,
+        id: Optional[str] = None,
     ) -> None:
-        super().__init__(series_name, DataTypeEnum.Datetime, series_data_model_id)
+        super().__init__(name, DataTypeEnum.Datetime, id)
 
     # TODO type dataframe without avoiding cyclic dependance USE interface!
     def validate(self, name_data_frame: str, series, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
@@ -210,34 +210,34 @@ class SeriesDataModelDateTime(SeriesDataModel):
 
     def to_dict(self) -> Dict:
         dict = {}
-        dict["__type__"] = "SeriesDataModelDateTime"
-        dict["series_name"] = self.series_name
-        dict["series_data_model_id"] = self.series_data_model_id
+        dict["series_schema"]["type"] = "SeriesDataModelDateTime"
+        dict["name"] = self.name
+        dict["id"] = self.id
         return dict
 
     @staticmethod
     def from_dict(dict: Dict) -> "SeriesDataModelDateTime":
-        if dict["__type__"] != "SeriesDataModelDateTime":
+        if dict["series_schema"]["type"] != "SeriesDataModelDateTime":
             raise Exception(f"invalid type {dict['__type__']}")
 
         return SeriesDataModelDateTime(
-            dict["series_name"],
-            dict["series_data_model_id"],
+            dict["name"],
+            dict["id"],
         )
 
 
 class SeriesDataModelInterval(SeriesDataModel):
     def __init__(
         self,
-        series_name: str,
-        series_data_model_id: Optional[str] = None,
+        name: str,
+        id: Optional[str] = None,
         *,
         unit: str = "unitless",
         min: Optional[float] = None,
         max: Optional[float] = None,
         resolution: Optional[float] = None,
     ) -> None:
-        super().__init__(series_name, DataTypeEnum.Interval, series_data_model_id)
+        super().__init__(name, DataTypeEnum.Interval, id)
         self.__unit = unit
         self.__min = min
         self.__max = max
@@ -297,9 +297,9 @@ class SeriesDataModelInterval(SeriesDataModel):
 
     def to_dict(self) -> Dict:
         dict = {}
-        dict["__type__"] = "SeriesDataModelInterval"
-        dict["series_name"] = self.series_name
-        dict["series_data_model_id"] = self.series_data_model_id
+        dict["series_schema"]["type"] = "SeriesDataModelInterval"
+        dict["name"] = self.name
+        dict["id"] = self.id
         dict["unit"] = self.unit
         dict["min"] = self.min
         dict["max"] = self.max
@@ -308,26 +308,26 @@ class SeriesDataModelInterval(SeriesDataModel):
 
     @staticmethod
     def from_dict(dict: Dict) -> "SeriesDataModelInterval":
-        if dict["__type__"] != "SeriesDataModelInterval":
+        if dict["series_schema"]["type"] != "SeriesDataModelInterval":
             raise Exception(f"invalid type {dict['__type__']}")
 
         return SeriesDataModelInterval(
-            dict["series_name"],
-            dict["series_data_model_id"],  # TODO pass other parameters
-            unit=dict["unit"],
-            min=dict["min"],
-            max=dict["max"],
-            resolution=dict["resolution"],
+            dict["name"],
+            dict["id"],  # TODO pass other parameters
+            unit=dict["series_schema"]["unit"],
+            min=dict["series_schema"]["min"],
+            max=dict["series_schema"]["max"],
+            resolution=dict["series_schema"]["resolution"],
         )
 
 
 class SeriesDataModelUnique(SeriesDataModel):
     def __init__(
         self,
-        series_name: str,
-        series_data_model_id: Optional[str] = None,
+        name: str,
+        id: Optional[str] = None,
     ) -> None:
-        super().__init__(series_name, DataTypeEnum.Unique, series_data_model_id)
+        super().__init__(name, DataTypeEnum.Unique, id)
 
     def validate(self, name_data_frame, series, list_problem: List[str] = []) -> Tuple[bool, List[str]]:
         problem_prefix = self._get_problem_prefix(name_data_frame)
@@ -343,17 +343,17 @@ class SeriesDataModelUnique(SeriesDataModel):
 
     def to_dict(self) -> Dict:
         dict = {}
-        dict["__type__"] = "SeriesDataModelUnique"
-        dict["series_name"] = self.series_name
-        dict["series_data_model_id"] = self.series_data_model_id
+        dict["series_schema"]["type"] = "SeriesDataModelUnique"
+        dict["name"] = self.name
+        dict["id"] = self.id
         return dict
 
     @staticmethod
     def from_dict(dict: Dict) -> "SeriesDataModelUnique":
-        if dict["__type__"] != "SeriesDataModelUnique":
-            raise Exception(f"invalid type {dict['__type__']}")
+        if dict["series_schema"]["type"] != "SeriesDataModelUnique":
+            raise Exception(f"invalid type {0}", dict["series_schema"]["type"])
 
         return SeriesDataModelUnique(
-            dict["series_name"],
-            dict["series_data_model_id"],
+            dict["name"],
+            dict["id"],
         )

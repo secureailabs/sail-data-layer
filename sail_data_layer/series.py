@@ -12,7 +12,7 @@ class Series(SeriesPandas):
     # class where the pandas object in a member not a superclass
     # TODO Put the datamodel last because we do that everwhere else
     def __init__(self, dataset_id: str, data_model_series: SeriesDataModel, list_data: List) -> None:
-        super().__init__(data=list_data, name=data_model_series.series_name)
+        super().__init__(data=list_data, name=data_model_series.name)
         # TODO trying to avoid circular import here solution would be to move the reference but that is invasive
         if not isinstance(dataset_id, str):
             raise Exception(f"{dataset_id} is not instance of class: {str} instead type is {type(dataset_id)}")
@@ -25,7 +25,7 @@ class Series(SeriesPandas):
 
     @property
     def series_name(self) -> str:
-        return self._data_model_series.series_name
+        return self._data_model_series.name
 
     @property
     def dataset_id(self) -> str:
